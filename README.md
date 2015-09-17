@@ -3,14 +3,14 @@
 * Build docker image via Quay.io
 * Create kuberbetes pods & service
 
-      kubectl create -f spark.yaml [--namespace=xxx]
+        kubectl create -f spark.yaml [--namespace=xxx]
         OR
-      kubectl create -f spark-ha.yaml [--namespace=xxx]
+        kubectl create -f spark-ha.yaml [--namespace=xxx]
 * Teardown
 
-      ./teardown.sh [--namespace=xxx]
+        ./teardown.sh [--namespace=xxx]
         OR
-      ./teardown-ha.sh [--namespace=xxx]
+        ./teardown-ha.sh [--namespace=xxx]
 
 -----
 ##### Notes:
@@ -23,13 +23,13 @@
 -----
 ##### TODO:
 * Kubernetes 1.0.x doesn't support emptyDir volumes for containers running as non-root (it's commit in master branch, not v1.0.0 branch, refer to https://github.com/kubernetes/kubernetes/pull/9384 & https://github.com/kubernetes/kubernetes/issues/12627). Use root rather than spark user instead at this moment.
-* Worker reports all CPU/RAM resources of the host to Master, rather than limitation set in Pod spec. 
+* Workers report all CPU/RAM resources of the host to Master, rather than limitation specified in Pod spec. 
 * Vulcand quick routing rules:
 
-      (1) make DNS Server dispatch to Vulcand for those with domain name "k8s"
-      (2) pattern matching spark-[ip*].[namespace].k8s, route to embedded ip
-      (3) pattern matching spark-master.[namespace].k8s, route to spark-master service's ip
-          (try to automate the mapping of spark-master's service ip, which may change once restart) 
+        (1) make DNS Server dispatch to Vulcand for those with domain name "k8s"
+        (2) pattern matching spark-[ip*].[namespace].k8s, route to embedded ip
+        (3) pattern matching spark-master.[namespace].k8s, route to spark-master service's ip
+            (try to automate the mapping of spark-master's service ip, which may change once restart) 
 * Master HA version verified
 
 [vd]: https://github.com/mailgun/vulcand
