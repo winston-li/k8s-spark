@@ -21,15 +21,28 @@
  
         Master: "spark-master.[namespace].k8s"
         Worker: "spark-[hostname].[namespace].k8s" 
-
-  Refer to [Kube2Vulcan][k2v] for details
+  Refer to [Kube2Vulcan][k2v] for details.
+* According to Spark [Application Monitoring Guide][spm], there might be multiple consecutive ports used if multiple SparkContexts running on the same host (the SparkContexts might locate at worker nodes or driver nodes). We let Vulcand listen on specific ports & a range of ports for this. 
+* Thanks to [Kubernetes Networking Model][knm], all nodes & containers can communicate without NAT. It relieves us from what described [here][spd] about Dockerize Spark.
 
 -----
 ##### TODO:
 * Kubernetes 1.0.x doesn't support emptyDir volumes for containers running as non-root (it's commit in master branch, not v1.0.0 branch, refer to https://github.com/kubernetes/kubernetes/pull/9384 & https://github.com/kubernetes/kubernetes/issues/12627). Use root rather than spark user instead at this moment.
 * Workers report all CPU/RAM resources of the host to Master, rather than limitation specified in Pod spec. 
 * Master HA version verification
-* Spark-submit workflows/mechanisms & verification
+* Spark-submit workflows/mechanisms & verification, plan to support both client mode and cluster mode: 
+      * Client mode
+          * Want to get a job result (dynamic analysis)
+          * Easier for developping/debugging
+          * Control where your Driver Program is running
+          * Always up application: expose your Spark job launcher as REST service or a Web UI
+      * Cluster mode
+          * Easier for resource allocation (let the master decide): Fire and forget
+          * Monitor your Driver Program from Master Web UI like other workers
+          * Stop at the end: one job is finished, allocated resources a freed
 
 [vd]: https://github.com/mailgun/vulcand
 [k2v]: https://github.com/rainbean/Kube2Vulcan
+[spm]: http://spark.apache.org/docs/latest/monitoring.html
+[knm]: https://github.com/kubernetes/kubernetes/blob/master/docs/admin/networking.md
+[spd]: http://sometechshit.blogspot.ru/2015/04/running-spark-standalone-cluster-in.html
