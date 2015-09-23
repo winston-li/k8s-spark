@@ -11,25 +11,18 @@ items:
       name: spark-master-svc
   spec: 
     ports: 
-    - name: service
+    - name: cluster-ui
+      port: 8000
+      targetPort: 8000
+    - name: app-ui
+      port: 4040
+      targetPort: 4040
+    - name: cluster-cmd
       port: 7077
       targetPort: 7077
-    - name: rest
+    - name: cluster-restcmd
       port: 6066
       targetPort: 6066
-    selector: 
-      name: spark-master-pod
-- kind: Service
-  apiVersion: v1
-  metadata: 
-    name: spark-master-pub
-    labels: 
-      name: spark-master-svc-pub
-  spec: 
-    ports: 
-    - name: webui
-      port: 8080
-      targetPort: 8080
     selector: 
       name: spark-master-pod
 - kind: ReplicationController
@@ -63,14 +56,14 @@ items:
               fieldRef:
                 fieldPath: metadata.namespace
           ports: 
-          - containerPort: 7077
-            name: service
-          - containerPort: 6066
-            name: rest
-          - containerPort: 8080
-            name: clusterui
+          - containerPort: 8000
+            name: cluster-ui
           - containerPort: 4040
-            name: appui
+            name: app-ui          
+          - containerPort: 7077
+            name: cluster-cmd
+          - containerPort: 6066
+            name: cluster-restcmd
           volumeMounts:
           - name: data
             mountPath: /spark_data/data
@@ -110,10 +103,10 @@ items:
               fieldRef:
                 fieldPath: metadata.namespace
           ports:
-          - containerPort: 8080
-            name: clusterui
+          - containerPort: 8000
+            name: cluster-ui
           - containerPort: 4040
-            name: appui
+            name: app-ui
         volumeMounts:
         - name: work
           mountPath: /spark_data/work
