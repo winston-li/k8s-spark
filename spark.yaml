@@ -14,9 +14,6 @@ items:
     - name: cluster-ui
       port: 8000
       targetPort: 8000
-    - name: app-ui
-      port: 4040
-      targetPort: 4040
     - name: cluster-cmd
       port: 7077
       targetPort: 7077
@@ -58,8 +55,6 @@ items:
           ports: 
           - containerPort: 8000
             name: cluster-ui
-          - containerPort: 4040
-            name: app-ui          
           - containerPort: 7077
             name: cluster-cmd
           - containerPort: 6066
