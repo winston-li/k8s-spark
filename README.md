@@ -19,8 +19,8 @@
 * To enable Spark run in Docker, set SPARK_LOCAL_HOSTNAME, which is then passed to AKKA for ensuing communications at Spark Workers. Refer to https://github.com/apache/spark/pull/3893 for SPARK_LOCAL_HOSTNAME
 * For each Master, create a corresponding Service for cluster communication. For the whole Spark cluster, create a specific Service for cluster WebUI (port 8000), so that they are accessible from external browsers via [Vulcand][vd]. Set SPARK_PUBLIC_DNS with this URL SCHEME:
  
-      Master: "spark-master.[namespace].k8s"
-      Worker: "spark-[hostname].[namespace].k8s" 
+        Master: "spark-master.[namespace].k8s"
+        Worker: "spark-[hostname].[namespace].k8s" 
 
   Refer to [Kube2Vulcan][k2v] for details
 
