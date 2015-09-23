@@ -43,8 +43,8 @@ SPARK_LOCAL_DIRS=/spark_data/data
 # - SPARK_DAEMON_JAVA_OPTS, to set config properties for all daemons (e.g. "-Dx=y")
 # - SPARK_PUBLIC_DNS, to set the public dns name of the master or workers
 SPARK_WORKER_DIR=/spark_data/work
-SPARK_MASTER_WEBUI_PORT=8000
-SPARK_WORKER_WEBUI_PORT=8000
+SPARK_MASTER_WEBUI_PORT=8080
+SPARK_WORKER_WEBUI_PORT=8080
 #SPARK_DAEMON_JAVA_OPTS="-Dspark.akka.logLifecycleEvents=true"
 
 # Generic options for the daemons used in the standalone deploy mode
