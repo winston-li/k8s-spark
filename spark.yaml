@@ -46,8 +46,8 @@ items:
               cpu: 1
               memory: 4Gi
           env:
-          - name: MASTER_ROLE
-            value: '1'
+          - name: ROLE
+            value: 'MASTER'
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -93,6 +93,8 @@ items:
               cpu: 2
               memory: 8Gi
           env:
+          - name: ROLE
+            value: 'WORKER'
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -124,3 +126,46 @@ items:
 #        nfs:
 #          server: nfs-server.default.kube.local
 #          path: "/spark"
+- kind: ReplicationController
+  apiVersion: v1
+  metadata: 
+    name: spark-driver-rc
+    labels: 
+      name: spark-driver-rc
+  spec: 
+    replicas: 1
+    selector:
+      name: spark-driver-pod
+    template:
+      metadata:
+        name: spark-driver-pod
+        labels:
+          name: spark-driver-pod
+      spec:
+        containers: 
+        - name: spark-driver
+          image: quay.io/draft/k8s-spark:v0.1
+          resources:
+            limits:
+              cpu: 1
+              memory: 4Gi
+          env:
+          - name: ROLE
+            value: 'DRIVER'
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          ports: 
+          - containerPort: 4040
+            name: app-ui
+          volumeMounts:
+          - name: data
+            mountPath: /spark_data/data
+          - name: log
+            mountPath: /spark_data/log
+        volumes:
+        - name: data
+          emptyDir: {}
+        - name: log
+          emptyDir: {}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -z "$MASTER_ROLE" ]; then
+if [ "$ROLE" = "MASTER" ]; then
   echo "Starting Master..."
   # spark-master k8s service redefined this variable, which is incompatible with Spark. Redefine it here. 
   export SPARK_MASTER_PORT=${SPARK_MASTER_SERVICE_PORT_CLUSTER_CMD:-7077}
@@ -11,9 +11,8 @@ if [ ! -z "$MASTER_ROLE" ]; then
   echo "$(hostname -i) ${SPARK_MASTER_IP}" >> /etc/hosts
   /opt/spark/sbin/start-master.sh
 else
-  echo "Starting Worker..."
   if [[ ${SPARK_MASTER_SERVICE_HOST} == "" ]]; then
-    echo "Spark Master service must be created before starting any workers"
+    echo "Spark Master service must be created before starting any others"
     sleep 30 # To postpone pod restart
     exit 1
   fi
@@ -23,7 +22,24 @@ else
   export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.k8s"
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
   echo "${SPARK_MASTER_SERVICE_HOST} spark-master" >> /etc/hosts
-  /opt/spark/sbin/start-slave.sh spark://spark-master:${SPARK_MASTER_PORT}
+  sleep 5 # wait for master pod ready <== REPLACE IT LATER ON
+    
+ 
+  if [ "$ROLE" = "WORKER" ]; then
+    echo "Starting Worker..."
+    /opt/spark/sbin/start-slave.sh spark://spark-master:${SPARK_MASTER_PORT}
+  elif [ "$ROLE" = "DRIVER" ]; then
+    echo "Starting Driver..."
+    echo "MASTER=spark://spark-master:$SPARK_MASTER_PORT" >> /opt/spark/conf/spark-env.sh
+    echo "Use kubectl exec spark-driver -it bash to invoke commands"
+    while true; do
+      sleep 100
+    done
+  else
+    echo "Environment variable ROLE must be defined (MASTER, WORKER, DRIVER)!"
+    sleep 30 # To postpone pod restart
+    exit 1
+  fi
 fi
 
 tail -F /spark_data/log/*
