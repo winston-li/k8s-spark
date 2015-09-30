@@ -22,9 +22,15 @@ else
   export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.k8s"
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
   echo "${SPARK_MASTER_SERVICE_HOST} spark-master" >> /etc/hosts
-  sleep 5 # wait for master pod ready <== REPLACE IT LATER ON
-    
- 
+  
+  # wait until master pod ready  
+  KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+  while [ $(curl -k https://${KUBERNETES_SERVICE_HOST}/api/v1/namespaces/${POD_NAMESPACE}/endpoints/spark-master -H "Authorization: Bearer ${KUBE_TOKEN}" | jq -r '.subsets[0].addresses[0].ip == null') == true ]; do
+    echo "Spark Master Pod is not ready..."
+    sleep 2
+  done
+  echo "Spark Master Pod has been ready!" 
+
   if [ "$ROLE" = "WORKER" ]; then
     echo "Starting Worker..."
     /opt/spark/sbin/start-slave.sh spark://spark-master:${SPARK_MASTER_PORT}
