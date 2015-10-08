@@ -1,46 +1,69 @@
 ---
 kind: List
 apiVersion: v1
-id: spark-setup
+id: spark-ha-setup
 items:
 - kind: Service
   apiVersion: v1
   metadata: 
-    name: spark-master
+    name: spark-master-1
     labels: 
-      name: spark-master-svc
+      name: spark-master-1-svc
   spec: 
     ports: 
+   - name: cluster-cmd
+      port: 7077
+      targetPort: 7077
+    - name: cluster-restcmd
+      port: 6066
+      targetPort: 6066
     - name: cluster-ui
       port: 8080
       targetPort: 8080
+    selector: 
+      name: spark-master-pod
+      master-id: '1'
+- kind: Service
+  apiVersion: v1
+  metadata: 
+    name: spark-master-2
+    labels: 
+      name: spark-master-2-svc
+  spec: 
+    ports: 
     - name: cluster-cmd
       port: 7077
       targetPort: 7077
     - name: cluster-restcmd
       port: 6066
       targetPort: 6066
+    - name: cluster-ui
+      port: 8080
+      targetPort: 8080
     selector: 
       name: spark-master-pod
+      master-id: '2'
 - kind: ReplicationController
   apiVersion: v1
   metadata: 
-    name: spark-master-rc
+    name: spark-master-1-rc
     labels: 
-      name: spark-master-rc
+      name: spark-master-1-rc
   spec: 
     replicas: 1
     selector:
       name: spark-master-pod
+      master-id: '1'
     template:
       metadata:
-        name: spark-master-pod
+        name: spark-master-1-pod
         labels:
           name: spark-master-pod
+          master-id: '1'
       spec:
         containers: 
         - name: spark-master
-          image: quay.io/draft/k8s-spark:v0.1
+          image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
             limits:
               cpu: 1
@@ -48,17 +71,90 @@ items:
           env:
           - name: ROLE
             value: 'MASTER'
+          - name: MASTER_ID
+            value: '1'
+          - name: ZOOKEEPER_CONNECT
+            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)/chroot/drama"
+          - name: SPARK_DAEMON_JAVA_OPTS
+            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/spark"
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
           ports: 
-          - containerPort: 8080
-            name: cluster-ui
           - containerPort: 7077
             name: cluster-cmd
           - containerPort: 6066
             name: cluster-restcmd
+          - containerPort: 8080
+            name: cluster-ui
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+          volumeMounts:
+          - name: data
+            mountPath: /spark_data/data
+          - name: log
+            mountPath: /spark_data/log
+        volumes:
+        - name: data
+          emptyDir: {}
+        - name: log
+          emptyDir: {}
+- kind: ReplicationController
+  apiVersion: v1
+  metadata: 
+    name: spark-master-2-rc
+    labels: 
+      name: spark-master-2-rc
+  spec: 
+    replicas: 1
+    selector:
+      name: spark-master-pod
+      master-id: '2'
+    template:
+      metadata:
+        name: spark-master-2-pod
+        labels:
+          name: spark-master-pod
+          master-id: '2'
+      spec:
+        containers: 
+        - name: spark-master
+          image: quay.io/draft/k8s-spark:1.4.0_v1.0
+          resources:
+            limits:
+              cpu: 1
+              memory: 4Gi
+          env:
+          - name: ROLE
+            value: 'MASTER'
+          - name: MASTER_ID
+            value: '2'
+          - name: ZOOKEEPER_CONNECT
+            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)/chroot/drama"
+          - name: SPARK_DAEMON_JAVA_OPTS
+            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/spark"
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          ports: 
+          - containerPort: 7077
+            name: cluster-cmd
+          - containerPort: 6066
+            name: cluster-restcmd
+          - containerPort: 8080
+            name: cluster-ui
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
           volumeMounts:
           - name: data
             mountPath: /spark_data/data
@@ -87,7 +183,7 @@ items:
       spec: 
         containers: 
         - name: spark-worker
-          image: quay.io/draft/k8s-spark:v0.1
+          image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
             limits: 
               cpu: 2
@@ -95,6 +191,8 @@ items:
           env:
           - name: ROLE
             value: 'WORKER'
+          - name: MASTER_CONNECT
+            value: "spark://spark-master-1:$(SPARK_MASTER_1_SERVICE_PORT),spark-master-2:$(SPARK_MASTER_2_SERVICE_PORT)"
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -104,6 +202,12 @@ items:
             name: cluster-ui
           - containerPort: 4040
             name: app-ui
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
         volumeMounts:
         - name: work
           mountPath: /spark_data/work
@@ -144,7 +248,7 @@ items:
       spec:
         containers: 
         - name: spark-driver
-          image: quay.io/draft/k8s-spark:v0.1
+          image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
             limits:
               cpu: 1
@@ -152,6 +256,8 @@ items:
           env:
           - name: ROLE
             value: 'DRIVER'
+          - name: MASTER_CONNECT
+            value: "spark://spark-master-1:$(SPARK_MASTER_1_SERVICE_PORT),spark-master-2:$(SPARK_MASTER_2_SERVICE_PORT)"
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -159,6 +265,12 @@ items:
           ports: 
           - containerPort: 4040
             name: app-ui
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4040
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
           volumeMounts:
           - name: data
             mountPath: /spark_data/data

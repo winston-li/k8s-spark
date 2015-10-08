@@ -12,10 +12,6 @@ RUN rpm --rebuilddb && yum install -y install wget tar && yum clean all \
     && mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/spark
 RUN alternatives --install /usr/bin/java java /opt/jre1.7.0_51/bin/java 1
 
-RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
-    && mv jq-linux64 /usr/bin/jq \
-    && chmod +x /usr/bin/jq
-
 ENV PATH /opt/spark/bin:$PATH
 WORKDIR /opt/spark
 
