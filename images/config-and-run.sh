@@ -52,7 +52,7 @@ else
     done
   done <<< "$MASTER_LIST"
 
-  export SPARK_LOCAL_HOSTNAME=$(hostname)
+  export SPARK_LOCAL_HOSTNAME=$(hostname -i)
   export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.k8s"
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
 
@@ -61,6 +61,7 @@ else
     /opt/spark/sbin/start-slave.sh ${MASTER_CONNECT}
   elif [ "${ROLE}" == "DRIVER" ]; then
     echo "Starting Driver..."
+    echo "SPARK_LOCAL_HOSTNAME=${SPARK_LOCAL_HOSTNAME}" >> /opt/spark/conf/spark-env.sh
     echo "MASTER=${MASTER_CONNECT}" >> /opt/spark/conf/spark-env.sh
     echo "Use kubectl exec spark-driver -it bash to invoke commands"
     while true; do

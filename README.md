@@ -14,7 +14,7 @@
 ##### Notes:
 * To run HA version, Zookeeper service is prerequisite. 
 * Spark Master's "hostname" must be equal to the name of "Spark Master Service", otherwise AKKA at Spark Master will drop messages due to mismatched inbound addresses with its own. However, if we'd like to have better resilience of Master, we should create k8s Replication Controller for Master, rather than creating Master Pod by ourselves. Unfortunately, the hostname of container within a Pod created by Replication Controller would be randomized, which is impossible to match the predefined name of its corresponding k8s service. To resolve this, set SPARK_MASTER_IP (will be deprecated, use SPARK_MASTER_HOST instead) to the same name of Spark Master Service would make Spark Master pass it (instead of hostname) to AKKA for ensuing communications.
-* To enable Spark run in Docker, set SPARK_LOCAL_HOSTNAME, which is then passed to AKKA for ensuing communications at Spark Workers. Refer to https://github.com/apache/spark/pull/3893 for SPARK_LOCAL_HOSTNAME
+* To enable Spark run in Docker, set SPARK_LOCAL_HOSTNAME, which is then passed to AKKA for ensuing communications at Spark Workers. Refer to https://github.com/apache/spark/pull/3893 for SPARK_LOCAL_HOSTNAME. In Spark Master HA scenario, the new active master will contact each worker, so we set SPARK_LOCAL_HOSTNAME at each worker with pod IP, e.g. $(hostname -i) to make them reachable by new master(s). 
 * For each Master, create a corresponding Service for cluster & client communication. The cluster WebUI (port 8080) of this Service is for being accessible from external browsers via [Vulcand][vd]. Set SPARK_PUBLIC_DNS with this URL SCHEME:
  
         Master: "spark-master-[1 or 2].[namespace].k8s"

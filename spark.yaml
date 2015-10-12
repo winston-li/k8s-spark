@@ -11,7 +11,7 @@ items:
       name: spark-master-1-svc
   spec: 
     ports: 
-   - name: cluster-cmd
+    - name: cluster-cmd
       port: 7077
       targetPort: 7077
     - name: cluster-restcmd
@@ -74,9 +74,9 @@ items:
           - name: MASTER_ID
             value: '1'
           - name: ZOOKEEPER_CONNECT
-            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)/chroot/drama"
+            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)"
           - name: SPARK_DAEMON_JAVA_OPTS
-            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/spark"
+            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/chroot/drama/spark"
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -93,7 +93,7 @@ items:
               path: /
               port: 8080
             initialDelaySeconds: 30
-            timeoutSeconds: 1
+            timeoutSeconds: 3
           volumeMounts:
           - name: data
             mountPath: /spark_data/data
@@ -135,9 +135,9 @@ items:
           - name: MASTER_ID
             value: '2'
           - name: ZOOKEEPER_CONNECT
-            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)/chroot/drama"
+            value: "$(ZOOKEEPER_1_SERVICE_HOST):$(ZOOKEEPER_1_SERVICE_PORT),$(ZOOKEEPER_2_SERVICE_HOST):$(ZOOKEEPER_2_SERVICE_PORT),$(ZOOKEEPER_3_SERVICE_HOST):$(ZOOKEEPER_3_SERVICE_PORT)"
           - name: SPARK_DAEMON_JAVA_OPTS
-            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/spark"
+            value: "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=$(ZOOKEEPER_CONNECT) -Dspark.deploy.zookeeper.dir=/chroot/drama/spark"
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
@@ -154,7 +154,7 @@ items:
               path: /
               port: 8080
             initialDelaySeconds: 30
-            timeoutSeconds: 1
+            timeoutSeconds: 3
           volumeMounts:
           - name: data
             mountPath: /spark_data/data
@@ -207,7 +207,7 @@ items:
               path: /
               port: 8080
             initialDelaySeconds: 30
-            timeoutSeconds: 1
+            timeoutSeconds: 3
         volumeMounts:
         - name: work
           mountPath: /spark_data/work
@@ -265,12 +265,6 @@ items:
           ports: 
           - containerPort: 4040
             name: app-ui
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 4040
-            initialDelaySeconds: 30
-            timeoutSeconds: 1
           volumeMounts:
           - name: data
             mountPath: /spark_data/data
