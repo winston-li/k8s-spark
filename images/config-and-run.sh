@@ -17,9 +17,15 @@ if [ "${ROLE}" == "MASTER" ]; then
   # spark-master k8s service redefined SPARK_MASTER_PORT, which is incompatible with Spark. Redefine it here.
   MASTER_SVC_PORT=SPARK_MASTER_${MASTER_ID}_SERVICE_PORT 
   export SPARK_MASTER_PORT=${!MASTER_SVC_PORT:-7077}
+  export SPARK_MASTER_WEBUI_PORT=${WEBUI_PORT:-8080}
   export SPARK_MASTER_IP="spark-master-${MASTER_ID}"
   export SPARK_PUBLIC_DNS="spark-master-${MASTER_ID}.${POD_NAMESPACE}.k8s"
+  echo "" >> /opt/spark/conf/spark-env.sh
+  echo "# Options set by config-and-run.sh" >> /opt/spark/conf/spark-env.sh
+  echo "SPARK_MASTER_IP=${SPARK_MASTER_IP}" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_MASTER_HOST=${SPARK_MASTER_IP}" >> /opt/spark/conf/spark-env.sh
+  echo "SPARK_MASTER_PORT=${SPARK_MASTER_PORT}" >> /opt/spark/conf/spark-env.sh
+  echo "SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
   echo "$(hostname -i) ${SPARK_MASTER_IP}" >> /etc/hosts
   /opt/spark/sbin/start-master.sh
@@ -54,14 +60,18 @@ else
 
   export SPARK_LOCAL_HOSTNAME=$(hostname -i)
   export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.k8s"
+  echo "" >> /opt/spark/conf/spark-env.sh
+  echo "# Options set by config-and-run.sh" >> /opt/spark/conf/spark-env.sh
+  echo "SPARK_LOCAL_HOSTNAME=${SPARK_LOCAL_HOSTNAME}" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
 
   if [ "${ROLE}" == "WORKER" ]; then
     echo "Starting Worker..."
+    export SPARK_WORKER_WEBUI_PORT=${WEBUI_PORT:-8080}
+    echo "SPARK_WORKER_WEBUI_PORT=${SPARK_WORKER_WEBUI_PORT}" >> /opt/spark/conf/spark-env.sh
     /opt/spark/sbin/start-slave.sh ${MASTER_CONNECT}
   elif [ "${ROLE}" == "DRIVER" ]; then
     echo "Starting Driver..."
-    echo "SPARK_LOCAL_HOSTNAME=${SPARK_LOCAL_HOSTNAME}" >> /opt/spark/conf/spark-env.sh
     echo "MASTER=${MASTER_CONNECT}" >> /opt/spark/conf/spark-env.sh
     echo "Use kubectl exec spark-driver -it bash to invoke commands"
     while true; do
