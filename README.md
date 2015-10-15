@@ -7,8 +7,6 @@
 * Teardown
 
         ./teardown.sh [--namespace=xxx]
-        OR
-        ./teardown-ha.sh [--namespace=xxx]
 
 -----
 ##### Notes:
