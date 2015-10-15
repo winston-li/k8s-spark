@@ -65,8 +65,8 @@ items:
         - name: spark-master
           image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
-            limits:
-              cpu: 1
+            requests:
+              cpu: 2
               memory: 4Gi
           env:
           - name: ROLE
@@ -128,8 +128,8 @@ items:
         - name: spark-master
           image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
-            limits:
-              cpu: 1
+            requests:
+              cpu: 2
               memory: 4Gi
           env:
           - name: ROLE
@@ -189,8 +189,8 @@ items:
         - name: spark-worker
           image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
-            limits: 
-              cpu: 2
+            requests:
+              cpu: 4
               memory: 8Gi
           env:
           - name: ROLE
@@ -256,8 +256,8 @@ items:
         - name: spark-driver
           image: quay.io/draft/k8s-spark:1.4.0_v1.0
           resources:
-            limits:
-              cpu: 1
+            requests:
+              cpu: 2
               memory: 4Gi
           env:
           - name: ROLE
