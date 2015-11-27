@@ -29,6 +29,6 @@ RUN chmod a+x ./bin/config-and-run.sh && \
 
 VOLUME ["/spark_data/data","/spark_data/log","/spark_data/work"]   
 
-#USER spark
+USER spark
 
 CMD ["/opt/spark/bin/config-and-run.sh"]
