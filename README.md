@@ -27,7 +27,7 @@
 
 -----
 ##### TODO:
-* ~~Kubernetes 1.0.x doesn't support emptyDir volumes for containers running as non-root (it's commit in master branch, not v1.0.0 branch, refer to https://github.com/kubernetes/kubernetes/pull/9384 & https://github.com/kubernetes/kubernetes/issues/12627). Use root rather than spark user instead at this moment.~~ (Done: It's verified OK in kubernetes 1.1.1 in using spark user instead of root)
+* Kubernetes 1.0.x doesn't support emptyDir volumes for containers running as non-root (it's commit in master branch, not v1.0.0 branch, refer to https://github.com/kubernetes/kubernetes/pull/9384 & https://github.com/kubernetes/kubernetes/issues/12627). Use root rather than spark user instead at this moment.
 * Workers report all CPU/RAM resources of the host to Master, rather than limitation specified in Pod spec. 
 * Which is more appropriate in k8s? one spark master w/ zookeeper vs. two spark masters w/ zookeeper?
 * According to Spark [Application Monitoring Guide][spm], there might be multiple consecutive ports used if multiple SparkContexts running on the same host (the SparkContexts might locate at worker nodes or driver nodes). Need a way to serve a range of ports for this at Vulcand. 
