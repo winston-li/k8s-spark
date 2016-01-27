@@ -1,4 +1,6 @@
 # k8s-spark: spark cluster of DRAFT on Kubernetes
+[![Docker Repository on Quay](https://quay.io/repository/draft/k8s-spark/status "Docker Repository on Quay")](https://quay.io/repository/draft/k8s-spark)
+
 ##### Steps:
 * Build docker image via Quay.io
 * Create kuberbetes pods & service
