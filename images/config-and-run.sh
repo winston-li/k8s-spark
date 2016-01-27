@@ -28,7 +28,7 @@ if [ "${ROLE}" == "MASTER" ]; then
   echo "SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_PUBLIC_DNS=${SPARK_PUBLIC_DNS}" >> /opt/spark/conf/spark-env.sh
   echo "$(hostname -i) ${SPARK_MASTER_IP}" >> /etc/hosts
-  /opt/spark/sbin/start-master.sh
+  gosu spark /opt/spark/sbin/start-master.sh
 else
   # assure all spark master k8s services have been created
   MASTER_LIST=$(echo $MASTER_CONNECT | sed 's#spark://###')
@@ -69,7 +69,7 @@ else
     echo "Starting Worker..."
     export SPARK_WORKER_WEBUI_PORT=${WEBUI_PORT:-8080}
     echo "SPARK_WORKER_WEBUI_PORT=${SPARK_WORKER_WEBUI_PORT}" >> /opt/spark/conf/spark-env.sh
-    /opt/spark/sbin/start-slave.sh ${MASTER_CONNECT}
+    gosu spark /opt/spark/sbin/start-slave.sh ${MASTER_CONNECT}
   elif [ "${ROLE}" == "DRIVER" ]; then
     echo "Starting Driver..."
     echo "MASTER=${MASTER_CONNECT}" >> /opt/spark/conf/spark-env.sh
@@ -84,4 +84,4 @@ else
   fi
 fi
 
-tail -F /spark_data/log/*
+exec gosu spark tail -F /spark_data/log/*
