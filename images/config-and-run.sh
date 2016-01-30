@@ -54,7 +54,7 @@ else
       done
       echo "${MASTER_HOST} Pod has been ready!"
              
-      echo "${!MASTER_SVC} ${MASTER_HOST}" >> /etc/hosts
+#      echo "${!MASTER_SVC} ${MASTER_HOST}" >> /etc/hosts
     done
   done <<< "$MASTER_LIST"
 
