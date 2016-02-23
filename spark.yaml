@@ -83,6 +83,8 @@ items:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DOMAIN_NAME
+            value: 'k8s.lab'
           ports: 
           - containerPort: 7077
             name: cluster-cmd
@@ -146,6 +148,8 @@ items:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DOMAIN_NAME
+            value: 'k8s.lab'
           ports: 
           - containerPort: 7077
             name: cluster-cmd
@@ -203,6 +207,8 @@ items:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DOMAIN_NAME
+            value: 'k8s.lab'
           ports:
           - containerPort: 8080
             name: cluster-ui
@@ -268,6 +274,8 @@ items:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DOMAIN_NAME
+            value: 'k8s.lab'
           ports: 
           - containerPort: 4040
             name: app-ui

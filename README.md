@@ -17,8 +17,8 @@
 * To enable Spark run in Docker, set SPARK_LOCAL_HOSTNAME, which is then passed to AKKA for ensuing communications at Spark Workers. Refer to https://github.com/apache/spark/pull/3893 for SPARK_LOCAL_HOSTNAME. In Spark Master HA scenario, the new active master will contact each worker, so we set SPARK_LOCAL_HOSTNAME at each worker with pod IP, e.g. $(hostname -i) to make them reachable by new master(s). 
 * For each Master, create a corresponding Service for cluster & client communication. The cluster WebUI (port 8080) of this Service is for being accessible from external browsers via [Vulcand][vd]. Set SPARK_PUBLIC_DNS with this URL SCHEME:
  
-        Master: "spark-master-[1 or 2].[namespace].k8s"
-        Worker: "spark-[hostname].[namespace].k8s" 
+        Master: "spark-master-[1 or 2].[namespace].[domain_name]"
+        Worker: "spark-[hostname].[namespace].[domain_name]"
   Refer to [Kube2Vulcan][k2v] for details.
 * Thanks to [Kubernetes Networking Model][knm], all nodes & containers can communicate without NAT. It relieves us from what described [here][spd] about Dockerize Spark.
 * Use livenessProbe to restart master and/or worker pods. It can mitigate the bug of ["restarting leader zookeeper causes spark master to die when the spark master election is assigned to zookeeper"] [jira9438].

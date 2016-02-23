@@ -19,7 +19,7 @@ if [ "${ROLE}" == "MASTER" ]; then
   export SPARK_MASTER_PORT=${!MASTER_SVC_PORT:-7077}
   export SPARK_MASTER_WEBUI_PORT=${WEBUI_PORT:-8080}
   export SPARK_MASTER_IP="spark-master-${MASTER_ID}"
-  export SPARK_PUBLIC_DNS="spark-master-${MASTER_ID}.${POD_NAMESPACE}.k8s"
+  export SPARK_PUBLIC_DNS="spark-master-${MASTER_ID}.${POD_NAMESPACE}.${DOMAIN_NAME}"
   echo "" >> /opt/spark/conf/spark-env.sh
   echo "# Options set by config-and-run.sh" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_MASTER_IP=${SPARK_MASTER_IP}" >> /opt/spark/conf/spark-env.sh
@@ -59,7 +59,7 @@ else
   done <<< "$MASTER_LIST"
 
   export SPARK_LOCAL_HOSTNAME=$(hostname -i)
-  export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.k8s"
+  export SPARK_PUBLIC_DNS="spark.$(hostname).${POD_NAMESPACE}.${DOMAIN_NAME}"
   echo "" >> /opt/spark/conf/spark-env.sh
   echo "# Options set by config-and-run.sh" >> /opt/spark/conf/spark-env.sh
   echo "SPARK_LOCAL_HOSTNAME=${SPARK_LOCAL_HOSTNAME}" >> /opt/spark/conf/spark-env.sh
