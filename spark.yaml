@@ -63,7 +63,7 @@ items:
       spec:
         containers: 
         - name: spark-master
-          image: quay.io/draft/k8s-spark:1.5.2_v1.1
+          image: quay.io/draft/k8s-spark:1.6.0_v1.1
           resources:
             requests:
               cpu: 2
@@ -128,7 +128,7 @@ items:
       spec:
         containers: 
         - name: spark-master
-          image: quay.io/draft/k8s-spark:1.5.2_v1.1
+          image: quay.io/draft/k8s-spark:1.6.0_v1.1
           resources:
             requests:
               cpu: 2
@@ -191,7 +191,7 @@ items:
       spec: 
         containers: 
         - name: spark-worker
-          image: quay.io/draft/k8s-spark:1.5.2_v1.1
+          image: quay.io/draft/k8s-spark:1.6.0_v1.1
           resources:
             requests:
               cpu: 4
@@ -260,7 +260,7 @@ items:
       spec:
         containers: 
         - name: spark-driver
-          image: quay.io/draft/k8s-spark:1.5.2_v1.1
+          image: quay.io/draft/k8s-spark:1.6.0_v1.1
           resources:
             requests:
               cpu: 2

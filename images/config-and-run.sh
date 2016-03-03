@@ -34,9 +34,11 @@ else
   MASTER_LIST=$(echo $MASTER_CONNECT | sed 's#spark://###')
   while IFS=',' read -ra MASTER; do
     for i in "${MASTER[@]}"; do
-      # get spark_master_host, spark_master_port, and spark_master_service
+      # (1) get spark_master_host, spark_master_port, and spark_master_service for spark versions earlier than 1.6.0
+      # (2) get spark_master_host, spark_master_ui_port, and spark_master_service for spark v1.6.0+
       MASTER_HOST=$(echo $i | sed 's/\(.*\):[0-9]*/\1/')
-      read MASTER_SVC MASTER_PORT <<< $(echo $i | sed 's/-/_/g' | sed 's/\(.*\):\([0-9]*\)/\U\1_SERVICE_HOST \2/')
+      #read MASTER_SVC MASTER_PORT <<< $(echo $i | sed 's/-/_/g' | sed 's/\(.*\):\([0-9]*\)/\U\1_SERVICE_HOST \2/')
+      read MASTER_SVC MASTER_UI_PORT <<< $(echo $i | sed 's/-/_/g' | sed 's/\(.*\):\([0-9]*\)/\U\1_SERVICE_HOST \1_SERVICE_PORT_CLUSTER_UI/')
       if [[ ${!MASTER_SVC} == "" ]]; then
         echo "${MASTER_HOST} service must be created before starting pods..."
         sleep 30 # To postpone pod restart
@@ -44,17 +46,17 @@ else
       fi
 
       # wait until master pods ready
-      # curl error code 52(Empty reply) here is expected for an alive master pod  
+      # (1) curl error code 52(Empty reply) here is expected for an alive master pod for spark versions earlier than 1.6.0
+      # (2) curl -I -L to get http response code. 200 is expected for an alive master pod for spark v1.6.0+
       # -m: max operation timeout; -Ss: hide progress meter but show error; --stderr -: redirect all writes to stdout
-      RET=$(curl -m 2 -Ss --stderr - ${MASTER_HOST}:${MASTER_PORT} | sed 's/.*curl: (\([0-9]*\)).*/\1/')
-      while [ ${RET} != 52 ]; do
+      # RET=$(curl -m 2 -Ss --stderr - ${MASTER_HOST}:${MASTER_PORT} | sed 's/.*curl: (\([0-9]*\)).*/\1/')
+      RET=$(curl -m 3 -I -L -Ss --stderr - ${MASTER_HOST}:${!MASTER_UI_PORT} | head -n 1 | cut -d$' ' -f2)
+      while [ ${RET} != 200 ]; do
         echo "${MASTER_HOST} Pod is not ready...(RET=${RET})"
-        sleep 2
-        RET=$(curl -m 2 -Ss --stderr - ${MASTER_HOST}:${MASTER_PORT} | sed 's/.*curl: (\([0-9]*\)).*/\1/')
+        sleep 3
+        RET=$(curl -m 3 -I -L -Ss --stderr - ${MASTER_HOST}:${!MASTER_UI_PORT} | head -n 1 | cut -d$' ' -f2)
       done
       echo "${MASTER_HOST} Pod has been ready!"
-             
-#      echo "${!MASTER_SVC} ${MASTER_HOST}" >> /etc/hosts
     done
   done <<< "$MASTER_LIST"
 
